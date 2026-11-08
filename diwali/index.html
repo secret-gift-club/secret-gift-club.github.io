@@ -10,7 +10,7 @@
 <meta name="description" content="A personal festival greeting card, sent by a friend.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Kalam:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Great+Vibes&family=Kalam:wght@700&display=swap" rel="stylesheet">
 <!--
   J.A.R.V.I.S festival gift page (published on GitHub Pages). The email's
   "Open your gift" button links here with the card in the URL's #fragment
@@ -534,7 +534,43 @@
   .diya::before { content: ""; position: absolute; left: 50%; top: 4px; width: 10px; height: 16px; margin-left: -5px; border-radius: 50% 50% 45% 45%;
                   background: radial-gradient(circle at 50% 70%, #fff7c2, #fbbf24 45%, #f97316 80%); box-shadow: 0 0 14px 6px rgba(251,191,36,.55);
                   opacity: 0; transform: scale(.2); transform-origin: 50% 100%; transition: opacity .3s, transform .3s; }
-  .diya.lit { filter: none; }
+  .diya.lit { filter: none; animation: diya-pop .55s cubic-bezier(.3,1.8,.5,1); }
+  @keyframes diya-pop { 40% { transform: scale(1.35) translateY(-6px); } }
+  /* all diyas lit: fireworks over the page and a big "Happy Diwali" */
+  .dw-sky { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+  .dw-hello { position: fixed; left: 50%; top: 44%; z-index: 41; pointer-events: none; text-align: center; width: min(560px, 94vw); padding: 34px 18px 30px;
+    transform: translate(-50%, -50%) scale(.3); opacity: 0; animation: dw-in .9s cubic-bezier(.25,1.6,.45,1) forwards; }
+  .dw-hello.bye { opacity: 1; transform: translate(-50%, -50%) scale(1); animation: dw-out .8s ease-in forwards; }
+  /* a warm glow behind the words, so they read over the fireworks */
+  .dw-dim { position: fixed; inset: 0; z-index: 39; cursor: pointer; opacity: 0;
+    background: radial-gradient(ellipse at 50% 45%, rgba(60,18,0,.95), rgba(10,3,0,.97) 75%);
+    animation: dw-fade .6s ease-out forwards; }
+  .dw-dim.bye { opacity: 1; animation: dw-fade .8s ease-in reverse forwards; }
+  .dw-close { display: block; margin-top: 18px; font: 600 13px "Segoe UI", sans-serif; letter-spacing: 1px; color: rgba(255,247,230,.75); opacity: 0; animation: dw-up .6s ease-out forwards 4s, dw-breathe 1.8s ease-in-out infinite 4.6s; }
+  @keyframes dw-breathe { 50% { opacity: .45; } }
+  @keyframes dw-fade { from { opacity: 0; } to { opacity: 1; } }
+  .dw-hello .dw-top { display: block; font: 700 clamp(18px, 5.4vw, 30px) Cinzel, "Kalam", Georgia, serif; letter-spacing: .5em; padding-left: .5em; color: #fde68a;
+    text-shadow: 0 0 14px rgba(251,191,36,.8); }
+  .dw-hello .dw-big { display: block; margin: 0 0 4px; padding: 0 .2em; font: 400 clamp(76px, 22vw, 150px)/1.1 "Great Vibes", "Kalam", cursive; white-space: nowrap; }
+  .dw-hello .dw-big i { display: inline-block; padding: 0 .06em; font-style: normal; color: #fcd34d; opacity: 0; transform: translateY(30px) scale(.4) rotate(-10deg);
+    background: linear-gradient(180deg, #fffbe6 0%, #fde68a 30%, #fbbf24 60%, #f97316 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 14px rgba(251,191,36,.8)) drop-shadow(0 3px 1px rgba(90,25,0,.9));
+    animation: dw-letter .6s cubic-bezier(.3,1.7,.5,1) forwards, dw-twinkle 2.4s ease-in-out infinite 1.6s; }
+  .dw-hello .dw-line { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 2px auto 10px; color: #fbbf24; font-size: 14px; }
+  .dw-hello .dw-line::before, .dw-hello .dw-line::after { content: ""; width: min(110px, 22vw); height: 1.5px; background: linear-gradient(90deg, transparent, #fbbf24); }
+  .dw-hello .dw-line::after { transform: scaleX(-1); }
+  .dw-hello .dw-sub, .dw-hello .dw-from { display: block; opacity: 0; animation: dw-up .7s ease-out forwards; }
+  .dw-hello .dw-sub { font: 600 clamp(14px, 3.8vw, 18px)/1.4 Georgia, "Kalam", serif; font-style: italic; color: #fff7e6; text-shadow: 0 2px 6px rgba(0,0,0,.7); animation-delay: 1.6s; }
+  .dw-hello .dw-from { margin-top: 8px; font: 400 clamp(24px, 7vw, 34px) "Great Vibes", "Kalam", cursive; color: #fcd34d; text-shadow: 0 0 10px rgba(249,115,22,.8); animation-delay: 2.1s; }
+  .dw-hello .dw-row { margin-top: 10px; font-size: clamp(24px, 7vw, 34px); letter-spacing: 10px; filter: drop-shadow(0 0 10px rgba(251,191,36,.9)); }
+  .dw-hello .dw-row i { display: inline-block; font-style: normal; opacity: 0; animation: dw-up .5s ease-out forwards; }
+  @keyframes dw-in { 60% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+  @keyframes dw-out { to { transform: translate(-50%, -50%) scale(1.15); opacity: 0; } }
+  @keyframes dw-letter { to { opacity: 1; transform: none; } }
+  @keyframes dw-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes dw-twinkle { 0%, 100% { opacity: 1; transform: none; } 50% { opacity: 1; transform: translateY(-3px); filter: drop-shadow(0 0 26px rgba(253,224,71,1)) drop-shadow(0 3px 1px rgba(90,25,0,.9)); } }
+  @media (prefers-reduced-motion: reduce) { .dw-dim, .dw-hello, .dw-hello * { animation-duration: .01s !important; animation-delay: 0s !important; } }
   .diya.lit::before { opacity: 1; transform: none; animation: flicker .5s ease-in-out infinite alternate; }
   .sparkler { position: fixed; inset: 0; z-index: 25; background: rgba(7,10,20,.55); touch-action: none; cursor: crosshair; }
   .sparkler-done { position: fixed; left: 50%; bottom: 20px; z-index: 31; transform: translateX(-50%); }
@@ -709,7 +745,7 @@
       wish: "Make a wish first… ✨", wishDone: "May your wish come true! 🎂", hbd: "🎉 Happy Birthday!",
       lockGift: "Your gift opens on its day", lockCard: "Your card opens on its day", opensOn: "{date}",
       days: "days", hrs: "hrs", mins: "min", secs: "sec",
-      diyaHint: "Tap the diyas to light them 🪔", diyaGift: "Light all 5 diyas to open your gift voucher 🪔🎁", diyaDone: "Shubh Deepavali! ✨", sparkler: "🎇 Sparkler", sparklerDone: "✓ Done",
+      diyaHint: "Tap the diyas to light them 🪔", diyaAuto: "The diyas are lighting up… 🪔", diyaBig1: "Happy", diyaBig2: "Diwali", diyaSub: "May your home glow with light, love & joy", diyaFrom: "with love, {from}", diyaClose: "Tap anywhere to continue ✨", diyaGift: "Light all 5 diyas to open your gift voucher 🪔🎁", diyaDone: "Shubh Deepavali! ✨", sparkler: "🎇 Sparkler", sparklerDone: "✓ Done",
       holiHint: "Tap the card to throw colours 🎨", holiDone: "Bura na mano, Holi hai! 🎉",
       rakhiHint: "Drag the rakhi to the wrist 🪢", rakhiDone: "Rakhi tied! A bond forever 💞",
       treeHint: "Tap the tree to decorate it 🎄", treeDone: "Beautiful! Merry Christmas ⭐", snow: "❄ Let it snow",
@@ -752,7 +788,7 @@
       wish: "पहले एक विश माँगो… ✨", wishDone: "विश पूरी हो! 🎂", hbd: "🎉 जन्मदिन मुबारक!",
       lockGift: "आपका तोहफ़ा अपने दिन खुलेगा", lockCard: "आपका कार्ड अपने दिन खुलेगा", opensOn: "{date}",
       days: "दिन", hrs: "घंटे", mins: "मिनट", secs: "सेकंड",
-      diyaHint: "दीये जलाने के लिए उन पर टैप करो 🪔", diyaGift: "पाँचों दीये जलाओ, तब खुलेगा आपका गिफ़्ट वाउचर 🪔🎁", diyaDone: "शुभ दीपावली! ✨", sparkler: "🎇 फुलझड़ी", sparklerDone: "✓ बस",
+      diyaHint: "दीये जलाने के लिए उन पर टैप करो 🪔", diyaAuto: "दीये जल रहे हैं… 🪔", diyaBig1: "शुभ", diyaBig2: "दीपावली", diyaSub: "आपका घर रोशनी, प्यार और ख़ुशियों से जगमगाए", diyaFrom: "ढेर सारे प्यार के साथ, {from}", diyaClose: "आगे बढ़ने के लिए कहीं भी टैप करें ✨", diyaGift: "पाँचों दीये जलाओ, तब खुलेगा आपका गिफ़्ट वाउचर 🪔🎁", diyaDone: "शुभ दीपावली! ✨", sparkler: "🎇 फुलझड़ी", sparklerDone: "✓ बस",
       holiHint: "रंग उड़ाने के लिए कार्ड पर टैप करो 🎨", holiDone: "बुरा न मानो, होली है! 🎉",
       rakhiHint: "राखी को कलाई तक खींचो 🪢", rakhiDone: "राखी बँध गई! यह बंधन सदा रहे 💞",
       treeHint: "पेड़ सजाने के लिए उस पर टैप करो 🎄", treeDone: "वाह! मेरी क्रिसमस ⭐", snow: "❄ बर्फ़ गिराओ",
@@ -1735,18 +1771,34 @@
     var k = st[0], box = el("div", "moment"), hint = el("div", "hint no-shot");
     var done = function (key) { put(hint, key); buzz([60, 40, 60]); confetti(80); };
     if (k === "diwali") {
-      var row = el("div", "row"), lit = 0;
+      var row = el("div", "row"), lit = 0, diyas = [];
+      var light = function (d) {
+        if (d.classList.contains("lit")) return;
+        d.classList.add("lit");
+        buzz(30);
+        if (++lit === 5) { done("diyaDone"); bang(); setTimeout(diwaliShow, 500); voucherOut(); }
+      };
       for (var i = 0; i < 5; i++) {
         var d = el("button", "diya", "🪔");
         d.setAttribute("aria-label", "Diya " + (i + 1));
-        d.onclick = function () {
-          if (this.classList.contains("lit")) return;
-          this.classList.add("lit");
-          buzz(30);
-          if (++lit === 5) { done("diyaDone"); bang(); voucherOut(); }
-        };
-        row.appendChild(d);
+        d.onclick = function () { light(this); };
+        row.appendChild(d); diyas.push(d);
       }
+      // they light by themselves, one by one, once the row is in view (a tap still lights one at once)
+      var autoLight = function () {
+        put(hint, "diyaAuto");
+        var n = 0;
+        (function next() {
+          while (n < diyas.length && diyas[n].classList.contains("lit")) n++;
+          if (n >= diyas.length) return;
+          light(diyas[n++]);
+          setTimeout(next, 750);
+        })();
+      };
+      var started = false, kick = function () { if (!started) { started = true; setTimeout(autoLight, 700); } };
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { o.disconnect(); kick(); } }, { threshold: 0.6 }).observe(row);
+      } else kick();
       var spark = put(el("button", "gc-btn no-shot"), "sparkler");
       spark.onclick = sparkler;
       var more = el("div", "gc-tools no-shot"); more.appendChild(spark);
@@ -1969,6 +2021,94 @@
       return box;
     }
     return null;
+  }
+  // Diwali, all diyas lit: rockets go up and burst over the page, and a big "Happy Diwali" pops up
+  function diwaliShow() {
+    if (document.querySelector(".dw-sky")) return;
+    var dim = el("div", "dw-dim");
+    document.body.appendChild(dim);
+    var hello = el("div", "dw-hello");
+    hello.setAttribute("role", "status");
+    hello.appendChild(put(el("span", "dw-top"), "diyaBig1"));
+    // the big word, letter by letter (Hindi's joined letters stay whole)
+    var big = el("span", "dw-big"), word = t("diyaBig2");
+    if (/^[\x00-\x7F]+$/.test(word)) {
+      word.split("").forEach(function (ch, i) { var c = el("i", "", ch); c.style.animationDelay = 0.45 + i * 0.09 + "s, " + (1.6 + i * 0.15) + "s"; big.appendChild(c); });
+    } else { var w = el("i", "", word); w.style.animationDelay = "0.45s"; big.appendChild(w); }
+    hello.appendChild(big);
+    hello.appendChild(el("div", "dw-line", "✦"));
+    hello.appendChild(put(el("span", "dw-sub"), "diyaSub"));
+    if (from) hello.appendChild(put(el("span", "dw-from"), "diyaFrom", { from: from }));
+    var lamps = el("div", "dw-row");
+    for (var q = 0; q < 5; q++) { var lp = el("i", "", "🪔"); lp.style.animationDelay = 2.4 + q * 0.12 + "s"; lamps.appendChild(lp); }
+    hello.appendChild(lamps);
+    hello.appendChild(put(el("span", "dw-close"), "diyaClose"));
+    document.body.appendChild(hello);
+    // it stays till they tap anywhere
+    var open = true, close = function () {
+      if (!open) return;
+      open = false;
+      dim.classList.add("bye"); hello.classList.add("bye");
+      setTimeout(function () { dim.remove(); hello.remove(); }, 850);
+    };
+    dim.addEventListener("click", close);
+    document.addEventListener("keydown", function esc(e) { if (e.key === "Escape") { document.removeEventListener("keydown", esc); close(); } });
+    if (still()) return;
+    var cv = el("canvas", "dw-sky"), r = Math.min(window.devicePixelRatio || 1, 2), W = innerWidth, H = innerHeight;
+    cv.width = W * r; cv.height = H * r;
+    var g = cv.getContext("2d"), rockets = [], sparks = [], t0 = performance.now(), last = 0, launched = 0;
+    g.scale(r, r);
+    document.body.appendChild(cv);
+    var hues = [45, 30, 0, 330, 280, 200, 120, 55];
+    var launch = function () {
+      launched++;
+      rockets.push({ x: W * (0.12 + Math.random() * 0.76), y: H + 10, vx: (Math.random() - 0.5) * 1.6, vy: -(H / 75) * (0.85 + Math.random() * 0.3),
+        top: H * (0.12 + Math.random() * 0.3), hue: hues[launched % hues.length], kind: launched % 4, trail: [] });
+    };
+    var burst = function (p) {
+      var n = p.kind === 3 ? 110 : 80, hue2 = (p.hue + 40) % 360;
+      for (var i = 0; i < n; i++) {
+        var a = (i / n) * Math.PI * 2 + Math.random() * 0.1, sp = p.kind === 1 ? 4.2 : 1.5 + Math.random() * 3.8;
+        sparks.push({ x: p.x, y: p.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, fade: 0.008 + Math.random() * 0.01,
+          hue: p.kind === 2 && i % 2 ? hue2 : p.hue, glitter: p.kind === 3, px: p.x, py: p.y });
+      }
+      sparks.push({ flash: true, x: p.x, y: p.y, life: 1, hue: p.hue });
+      if (launched % 2) bang();
+      buzz(20);
+    };
+    (function frame(now) {
+      var age = now - t0;
+      // a volley of rockets for the first ~6s, then let the last ones fade
+      if (open && now - last > (age < 1200 ? 260 : age < 10000 ? 480 : 850)) { last = now; launch(); if (Math.random() < 0.35) launch(); }
+      g.globalCompositeOperation = "destination-out";
+      g.fillStyle = "rgba(0,0,0,.22)"; g.fillRect(0, 0, W, H);
+      g.globalCompositeOperation = "lighter";
+      rockets = rockets.filter(function (p) {
+        p.trail.push({ x: p.x, y: p.y }); if (p.trail.length > 10) p.trail.shift();
+        p.x += p.vx; p.y += p.vy; p.vy += 0.06;
+        g.strokeStyle = "hsla(" + p.hue + ",100%,70%,.9)"; g.lineWidth = 2.5; g.lineCap = "round";
+        g.beginPath(); g.moveTo(p.trail[0].x, p.trail[0].y); g.lineTo(p.x, p.y); g.stroke();
+        for (var k = 0; k < 2; k++) sparks.push({ x: p.x, y: p.y, vx: (Math.random() - 0.5) * 0.8, vy: 1 + Math.random(), life: 0.6, fade: 0.04, hue: 40 });
+        if (p.y <= p.top || p.vy >= -0.5) { burst(p); return false; }
+        return true;
+      });
+      sparks = sparks.filter(function (s) {
+        if (s.flash) {
+          var grd = g.createRadialGradient(s.x, s.y, 0, s.x, s.y, 90);
+          grd.addColorStop(0, "hsla(" + s.hue + ",100%,85%," + s.life * 0.55 + ")"); grd.addColorStop(1, "hsla(" + s.hue + ",100%,60%,0)");
+          g.fillStyle = grd; g.fillRect(s.x - 90, s.y - 90, 180, 180);
+          s.life -= 0.12; return s.life > 0;
+        }
+        s.px = s.x; s.py = s.y;
+        s.vx *= 0.975; s.vy = s.vy * 0.975 + 0.045; s.x += s.vx; s.y += s.vy; s.life -= s.fade;
+        var a = s.glitter ? (Math.random() < 0.5 ? s.life : s.life * 0.2) : s.life;
+        g.strokeStyle = "hsla(" + s.hue + ",100%," + (55 + s.life * 30) + "%," + a + ")"; g.lineWidth = 2;
+        g.beginPath(); g.moveTo(s.px, s.py); g.lineTo(s.x, s.y); g.stroke();
+        return s.life > 0;
+      });
+      if (open || rockets.length || sparks.length) requestAnimationFrame(frame);
+      else cv.remove();
+    })(t0);
   }
   // Diwali: a sparkler, drawn with a finger over the page
   function sparkler() {
