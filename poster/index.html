@@ -11,11 +11,13 @@
   A photo poster sent as a link (Jarvis → Festivals → 🖼 → 🔗 Link): the card
   is in the #fragment (base64url JSON, never sent to any server), drawn by
   poster.js (made from the app's own poster code). Its lights catch one by
-  one, a cake's candles are blown out (or into the mic), then the pop-up; a
-  gift voucher's code shows as text to copy.
+  one (or as they're tapped), a cake's candles are blown out (by themselves,
+  or with a tap), then the pop-up; a gift voucher's code shows on its ticket,
+  with Copy under it. Nothing but the card on the page.
     k kind, th theme, fr frame, n name, a age, f from, w wish, c closing,
     p photo, b background (https / data:image), z zoom, y photo up-down,
-    v { b brand, a amount (shown), c code, sc code on the picture too }
+    v { b brand, a amount (shown), c code, sc code on the picture too },
+    ob the opening button's words (default "🎁 Open your surprise")
 -->
 <style>
   :root { --bg: #0b0614; --ink: #fff7fb; --muted: #d9c7e6; --accent: #ff5e9c; --gold: #f6c445; --glass: rgba(255,255,255,.08); --line: rgba(255,255,255,.16); }
@@ -24,17 +26,13 @@
   body {
     background: radial-gradient(ellipse at 50% 0%, #3b1352 0%, transparent 60%), radial-gradient(ellipse at 50% 100%, #0e3a4f 0%, transparent 55%), var(--bg);
     color: var(--ink); font: 15px/1.45 "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
-    display: flex; flex-direction: column; align-items: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%;
     padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
     -webkit-tap-highlight-color: transparent;
   }
-  .stage { position: relative; width: min(94vw, calc(100vh - 190px), 640px); min-width: 260px; margin-top: 6px; }
+  /* just the card: nothing under it */
+  .stage { position: relative; width: min(94vw, calc(100vh - 32px), 640px); min-width: 260px; }
   canvas { display: block; width: 100%; aspect-ratio: 1; border-radius: 18px; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 24px 70px -12px rgba(255,94,156,.45); cursor: pointer; touch-action: manipulation; }
-  .hint { margin: 12px 0 4px; min-height: 22px; text-align: center; color: var(--muted); font-size: 14px; max-width: 640px; }
-  .dots { display: flex; gap: 7px; justify-content: center; margin-top: 10px; }
-  .dots i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.18); transition: all .3s; }
-  .dots i.on { background: var(--gold); box-shadow: 0 0 10px var(--gold); transform: scale(1.15); }
-  .row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
   button, .btn {
     font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: none; cursor: pointer;
     padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--glass); backdrop-filter: blur(8px);
@@ -46,18 +44,15 @@
   .primary { border-color: transparent; background: linear-gradient(90deg, #ff4f8b, #ff9a3c); box-shadow: 0 6px 20px rgba(255,79,139,.4); }
   .corner { position: absolute; top: 10px; right: 10px; padding: 4px 10px; font-size: 12px; background: rgba(0,0,0,.45); }
 
-  /* the voucher, once the pop-up's up: the code as text to copy */
-  .voucher { display: none; margin-top: 14px; width: min(94vw, 520px); border-radius: 18px; padding: 16px 18px;
-    background: linear-gradient(135deg, rgba(246,196,69,.22), rgba(255,94,156,.14)); border: 1px solid rgba(246,196,69,.45);
-    box-shadow: 0 14px 40px -12px rgba(246,196,69,.45); animation: rise .6s cubic-bezier(.2,1.4,.4,1) both; }
-  .voucher.show { display: block; }
-  .voucher h2 { margin: 0 0 4px; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
-  .voucher p { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
-  .code { display: flex; gap: 8px; align-items: center; }
-  .code output { flex: 1; min-width: 0; font: 700 20px/1.2 "Courier New", monospace; letter-spacing: .06em; padding: 10px 12px; border-radius: 12px;
-    background: rgba(0,0,0,.35); border: 1px dashed rgba(246,196,69,.6); user-select: all; overflow-wrap: anywhere; }
-  .safe { margin-top: 10px; font-size: 12px; color: var(--muted); }
-  @keyframes rise { from { opacity: 0; transform: translateY(30px) scale(.94); } to { opacity: 1; transform: none; } }
+  /* the voucher's code, on the pop-up's ticket: tap it (or Copy under it) to copy */
+  .vhit { position: absolute; display: none; left: 44%; width: 28%; top: 83.2%; height: 4.6%; border: 0; padding: 0; border-radius: 999px;
+    background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; cursor: copy; }
+  .vbar { position: absolute; left: 0; right: 0; top: 90.6%; display: none; justify-content: center; gap: 6px; animation: rise .5s cubic-bezier(.2,1.4,.4,1) both; }
+  .vhit.show { display: block; }
+  .vbar.show { display: flex; }
+  .vbar button, .vbar .btn { font-size: 12px; padding: 6px 12px; background: rgba(20,8,30,.72); }
+  .vbar .primary { background: linear-gradient(90deg, #ff4f8b, #ff9a3c); }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.94); } to { opacity: 1; transform: none; } }
 
   /* the cover: a gift to tap open (the tap also lets the sound play) */
   .cover { position: fixed; inset: 0; z-index: 5; display: grid; place-items: center; text-align: center; padding: 24px;
@@ -69,7 +64,7 @@
   .cover button { font-size: 17px; padding: 13px 30px; }
   @keyframes bob { 50% { transform: translateY(-12px) rotate(-4deg); } }
   .bad { margin-top: 30vh; text-align: center; color: var(--muted); max-width: 420px; }
-  @media (prefers-reduced-motion: reduce) { .cover .gift, .voucher { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .cover .gift, .vbar { animation: none; } }
 </style>
 </head>
 <body>
@@ -78,28 +73,19 @@
     <div class="gift" id="coverMark">🎁</div>
     <h1 id="coverTitle">Aapke liye ek card aaya hai 💌</h1>
     <p id="coverFrom"></p>
-    <button class="primary" id="open" type="button">Kholo ✨</button>
+    <button class="primary" id="open" type="button">🎁 Open your surprise</button>
   </div>
 </div>
 
 <div class="stage" id="stage" hidden>
   <canvas id="card" width="1080" height="1080" aria-label="Your card"></canvas>
   <button class="corner" id="sound" type="button" aria-label="Sound on / off">🔊</button>
-</div>
-<div class="dots" id="dots" aria-hidden="true"></div>
-<div class="hint" id="hint" aria-live="polite"></div>
-<div class="row" id="controls"></div>
-
-<section class="voucher" id="voucher" aria-live="polite">
-  <h2>🎁 Gift voucher</h2>
-  <p id="vText"></p>
-  <div class="code" id="vCodeRow">
-    <output id="vCode"></output>
-    <button class="primary" id="vCopy" type="button">📋 Copy</button>
+  <button class="vhit" id="vHit" type="button" aria-label="Copy the gift voucher code" title="Tap to copy"></button>
+  <div class="vbar" id="vBar">
+    <button class="primary" id="vCopy" type="button">📋 Copy code</button>
   </div>
-  <div class="row" id="vMore"></div>
-  <div class="safe">Yeh page kabhi password, OTP ya card details nahi maangta.</div>
-</section>
+</div>
+
 
 <div class="bad" id="bad" hidden>Yeh card ka link poora nahi lag raha. Bhejne wale se dobara bhejne ko kaho 🙏</div>
 
@@ -128,7 +114,7 @@
     name: str(data.n, 60), age: str(data.a, 4).replace(/\D/g, ""), from: str(data.f, 60), wish: str(data.w, 300), closing: str(data.c, 80),
     zoom: Math.min(2.5, Math.max(1, Number(data.z) || 1)), posY: Math.min(1, Math.max(0, data.y == null ? 0.3 : Number(data.y))),
     photo: null, background: null,
-    voucher: v ? { on: true, brand: str(v.b, 24), amount: Number(v.a) || 0, showAmount: Number(v.a) > 0, code: str(v.c, 24).replace(/[^A-Za-z0-9-]/g, "").toUpperCase(), showCode: !!v.sc } : null
+    voucher: v ? { on: true, brand: str(v.b, 24), amount: Number(v.a) || 0, showAmount: Number(v.a) > 0, code: str(v.c, 24).replace(/[^A-Za-z0-9-]/g, "").toUpperCase(), showCode: true } : null
   };
   var K = P.kindOf(opts.kind);
   var lights = P.lightsOf(opts);
@@ -137,6 +123,9 @@
   $("coverMark").textContent = K.emoji;
   $("coverTitle").textContent = (opts.name ? opts.name + ", " : "") + "aapke liye ek card aaya hai 💌";
   $("coverFrom").textContent = opts.from ? "— " + opts.from : "";
+  // the opening button: the sender's own words, if they gave some
+  var openLabel = str(data.ob, 40).trim();
+  if (openLabel) $("open").textContent = openLabel;
 
   var load = function (src) {
     return new Promise(function (resolve) {
@@ -162,24 +151,8 @@
   var later = function (fn, ms) { timers.push(setTimeout(fn, ms)); };
   var play = function (fn) { if (sound) { try { fn(); } catch (e) { /* no sound here */ } } };
 
-  var dots = $("dots");
-  for (var i = 0; i < n; i++) dots.appendChild(document.createElement("i"));
-  var hint = function (text) { $("hint").textContent = text; };
+  // nothing but the card: everything's done by tapping it (see canvas.onclick)
   var litCount = function () { return clock.lit.filter(function (x) { return x != null; }).length; };
-  var showDots = function () {
-    Array.prototype.forEach.call(dots.children, function (d, k) { d.className = !done && clock.lit[k] != null ? "on" : ""; });
-  };
-
-  var controls = $("controls");
-  var button = function (label, onClick, primary) {
-    var b = document.createElement("button");
-    b.type = "button";
-    b.textContent = label;
-    if (primary) b.className = "primary";
-    b.onclick = onClick;
-    controls.appendChild(b);
-    return b;
-  };
   var link = function (label, href) {
     var a = document.createElement("a");
     a.className = "btn";
@@ -188,26 +161,6 @@
     a.target = "_blank";
     a.rel = "noopener";
     return a;
-  };
-  var refresh = function () {
-    controls.textContent = "";
-    showDots();
-    if (done) {
-      hint(voucherShown ? K.emoji + " " + K.top + " " + K.title + "! 🎁 Aapke liye ek gift voucher bhi hai" : (K.blow ? "🎉 Wish poori ho! " : "") + K.emoji + " " + K.top + " " + K.title + "!");
-      button("🔄 Phir se dekho", replay, true);
-      var thanks = "Thank you" + (opts.from ? " " + opts.from : "") + "! 🙏 Card bahut pyaara laga 💌";
-      controls.appendChild(link("💌 Shukriya bolo", "https://wa.me/?text=" + encodeURIComponent(thanks)));
-      button("⬇ Save", save);
-      return;
-    }
-    var lit = litCount();
-    if (lit < n) {
-      hint(K.hint + " (" + lit + "/" + n + "): tap karke bhi jala sakte ho");
-      button("✨ Sab jalao", lightAll, true);
-    } else if (K.blow) {
-      button("🕯️ Blow!", blowOut, true);
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) button(micStop ? "⏹ Mic band" : "🎤 Mic me phoonko", micStop ? function () { micStop(); } : micBlow);
-    } else hint("✨ Sab jal gaye… ab aa raha hai!");
   };
 
   var blowOut = function () {
@@ -220,15 +173,13 @@
     if (K.blow) play(P.blowWhoosh);
     later(function () { play(P.tada); }, 600);
     later(function () { play(function () { var s = P.songFor(opts.kind); P.playSong(s.notes, { bpm: s.bpm }); }); }, 1500);
-    if (P.voucherOf(opts)) later(showVoucher, 2300);
-    refresh();
+    if (P.voucherOf(opts)) later(showVoucher, 2900); // once the ticket has landed
   };
   var wishThenBlow = function () {
     var left = 3;
     var step = function () {
       if (done) return;
       if (left <= 0) return blowOut();
-      hint("🙏 Aankhen band karo, wish maango… " + left + " second me mombattiyan bujhengi");
       left -= 1;
       later(step, 1000);
     };
@@ -238,104 +189,61 @@
     if (done || clock.lit[k] != null) return;
     clock.lit[k] = now();
     play(function () { P.lightChime(k); });
-    refresh();
     if (litCount() === n) { if (K.blow) wishThenBlow(); else later(blowOut, 1300); }
   };
   var lightAll = function () {
     clock.lit.forEach(function (x, k) { if (x == null) later(function () { lightOne(k); }, 250 + k * 600); });
   };
-  var replay = function () {
-    timers.forEach(clearTimeout); timers = [];
-    P.stopAll();
-    if (micStop) micStop();
-    clock = { lit: lights.map(function () { return null; }), blowAt: null, popAt: null };
-    done = false;
-    voucherShown = false;
-    $("voucher").classList.remove("show");
-    refresh();
-    later(lightAll, 500);
-  };
-  var micBlow = function () {
-    var Ctx = window.AudioContext || window.webkitAudioContext;
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
-      var ac = new Ctx(), an = ac.createAnalyser(), on = true, loud = 0, until = Date.now() + 20000;
-      an.fftSize = 512;
-      ac.createMediaStreamSource(stream).connect(an);
-      var buf = new Uint8Array(an.fftSize);
-      micStop = function () {
-        if (!on) return;
-        on = false; micStop = null;
-        stream.getTracks().forEach(function (tr) { tr.stop(); });
-        ac.close();
-        refresh();
-      };
-      hint("🌬️ Ab mic me zor se phoonko…");
-      refresh();
-      (function listen() {
-        if (!on) return;
-        if (Date.now() > until) return micStop();
-        an.getByteTimeDomainData(buf);
-        var sum = 0;
-        for (var j = 0; j < buf.length; j++) { var d = (buf[j] - 128) / 128; sum += d * d; }
-        loud = Math.sqrt(sum / buf.length) > 0.18 ? loud + 1 : 0;
-        if (loud > 5) blowOut(); else requestAnimationFrame(listen);
-      })();
-    }, function () { hint("😕 Mic nahi mila: 🕯️ Blow! dabao"); });
-  };
-
-  // the voucher, as text: copy its code, open where it's redeemed
+  // the voucher's code, on its ticket in the pop-up: Copy under it, a tap on the code, and where it's redeemed
   var REDEEM = { amazon: "https://www.amazon.in/gc/redeem", flipkart: "https://www.flipkart.com/account/giftcard", myntra: "https://www.myntra.com/giftcard",
-    nykaa: "https://www.nykaa.com/gift-card", swiggy: "https://www.swiggy.com/", zomato: "https://www.zomato.com/", bookmyshow: "https://in.bookmyshow.com/giftcards", tanishq: "https://www.tanishq.co.in/gift-card" };
+    nykaa: "https://www.nykaa.com/gift-card", bookmyshow: "https://in.bookmyshow.com/giftcards", tanishq: "https://www.tanishq.co.in/gift-card" };
   var showVoucher = function () {
     var gv = opts.voucher;
     voucherShown = true;
-    $("vText").textContent = (gv.brand ? gv.brand + " gift voucher" : "Ek khaas gift voucher") + (gv.showAmount ? " · " + P.rupees(gv.amount) : "") + (gv.code ? ": yeh code copy karke redeem karo." : ": code aapko alag se mil jayega.");
-    $("vCodeRow").hidden = !gv.code;
-    $("vCode").textContent = gv.code;
-    var more = $("vMore");
-    more.textContent = "";
-    var url = REDEEM[gv.brand.toLowerCase().replace(/[^a-z]/g, "")];
-    if (url && gv.code) more.appendChild(link("🛍 " + gv.brand + " pe redeem karo", url));
-    $("voucher").classList.add("show");
-    refresh();
-  };
-  $("vCopy").onclick = function () {
-    var code = $("vCode").textContent, b = $("vCopy");
-    var ok = function () { b.textContent = "✓ Copied"; setTimeout(function () { b.textContent = "📋 Copy"; }, 2000); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(ok, selectCode);
-    else selectCode();
-    function selectCode() {
-      var r = document.createRange();
-      r.selectNodeContents($("vCode"));
-      var s = getSelection(); s.removeAllRanges(); s.addRange(r);
-      try { document.execCommand("copy"); ok(); } catch (e) { b.textContent = "Select ho gaya: Copy dabao"; }
+    if (gv.code) {
+      var bar = $("vBar");
+      Array.prototype.slice.call(bar.querySelectorAll("a")).forEach(function (a) { a.remove(); });
+      var url = REDEEM[gv.brand.toLowerCase().replace(/[^a-z]/g, "")];
+      if (url) bar.appendChild(link("🛍 Redeem", url));
+      bar.classList.add("show");
+      $("vHit").classList.add("show");
     }
   };
-
-  var save = function () {
-    try {
-      var c = P.paintPhotoPoster(Object.assign({}, opts, { t: 0, show: {} }));
-      c.toBlob(function (blob) {
-        if (!blob) { hint("Is card ko save nahi kar paaye: screenshot le lo 📸"); return; }
-        var a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = (K.title.toLowerCase().replace(/[^a-z]+/g, "-")) + "-card.png";
-        a.click();
-      });
-    } catch (e) {
-      hint("Is card ko save nahi kar paaye: screenshot le lo 📸");
-    }
+  var copyCode = function () {
+    var code = opts.voucher.code, b = $("vCopy");
+    var ok = function () {
+      b.textContent = "✓ Copied: " + code;
+      setTimeout(function () { b.textContent = "📋 Copy code"; }, 2200);
+    };
+    var fallback = function () {
+      var t = document.createElement("textarea");
+      t.value = code;
+      t.setAttribute("readonly", "");
+      t.style.position = "fixed"; t.style.opacity = "0";
+      document.body.appendChild(t);
+      t.select();
+      try { document.execCommand("copy"); ok(); } catch (e) { b.textContent = code; }
+      t.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(ok, fallback);
+    else fallback();
   };
+  $("vCopy").onclick = copyCode;
+  $("vHit").onclick = copyCode;
 
   $("sound").onclick = function () {
     sound = !sound;
     if (!sound) P.stopAll();
     $("sound").textContent = sound ? "🔊" : "🔇";
   };
+  // a tap on the card: lights the one tapped (or the rest, one by one); once they're all alight, blows a cake's out
   canvas.onclick = function (e) {
+    if (done) return;
+    if (litCount() === n) { if (K.blow) blowOut(); return; }
     var r = canvas.getBoundingClientRect();
     var k = P.lightAt(opts, (e.clientX - r.left) / r.width * P.POSTER_SIZE, (e.clientY - r.top) / r.height * P.POSTER_SIZE);
     if (k >= 0) lightOne(k);
+    else lightAll();
   };
 
   // draw: the still layer once, what moves ~30 times a second
@@ -360,7 +268,6 @@
     play(function () { P.tada(); });
     ready.then(function () {
       requestAnimationFrame(frame);
-      refresh();
       later(lightAll, 700);
     });
   };
